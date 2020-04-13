@@ -8,6 +8,7 @@
  *	code, is my own original work.
  */
 #include <avr/io.h>
+#include "RIMS.h"
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
@@ -20,18 +21,18 @@ void Tick(){
 			state = s0;
 			break;
 		case s0:
-			if(PINA & 0x01){
+			if(A0){
 				state = s1;
 			}
-			else if(!(PINA & 0x01)){
+			else if(!A0){
 				state = s0;
 			}
 			break;
 		case s1:
-			if(PINA & 0x01){
+			if(A0){
 				state = s0;
 			}
-			else if(!(PINA & 0x01)){
+			else if(!A0){
 				state = s1;
 			}
 			break;
@@ -41,10 +42,12 @@ void Tick(){
 	} // Transitions
 	switch(state){ // State actions
 		case s0:
-			PINB = 0x01;
+			B0 = 1;
+			B1 = 0;
 			break;
 		case s1:
-			PINB = 0x02;
+			B0 = 0;
+			B1 = 1;
 			break;
 		default:
 			break;
@@ -52,8 +55,9 @@ void Tick(){
 }
 
 int main(void) {
-	DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
-	DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs
+	//DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
+	//DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs
+	B = 0x00;
 	state = Start;
 	while (1) {
 		Tick();	
