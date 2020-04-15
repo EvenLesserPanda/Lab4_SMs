@@ -12,39 +12,52 @@
 #include "simAVRHeader.h"
 #endif
 
-enum States{Start, s0, s1} state;
+enum States{Start, Wait, Increment, Decrement, Reset} state;
 
 void Tick(){
 	switch(state){
 		case Start: // Initial transition
-			state = s0;
+			PORTC = 0x07;
+			state = OFF_RELEASE;
 			break;
-		case s0:
+		case Wait:
 			if(PINA & 0x01){
-				state = s1;
+				state = Decrement;
 			}
-			else if(!(PINA & 0x01)){
-				state = s0;
+			else if(PINA & 0x02){
+				state = Increment;
+			}
+			else if(PINA & 0x03){
+				state = Reset;
+			}
+			else{
+				state = Reset;
 			}
 			break;
-		case s1:
-			if(PINA & 0x01){
-				state = s0;
-			}
-			else if(!(PINA & 0x01)){
-				state = s1;
-			}
+		case Increment:
+			state = Wait;
+			break;
+		case Decrement:
+			state = Wait;
+			break;
+		case Reset:
+			state = Wait;
 			break;
 		default:
 			state = Start;
 			break;
 	} // Transitions
 	switch(state){ // State actions
-		case s0:
-			PINB = 0x01;
+		case Wait:
 			break;
-		case s1:
-			PINB = 0x02;
+		case Increment:
+			PORTC += 1;
+			break;
+		case Decrement:
+			PORTC -= 1;
+			break;
+		case Reset:
+			PORTC = 0x00;
 			break;
 		default:
 			break;
@@ -53,7 +66,7 @@ void Tick(){
 
 int main(void) {
 	DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
-	DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs
+	DDRC = 0xFF; PORTC = 0x00; // Configure port C's 8 pins as outputs
 	state = Start;
 	while (1) {
 		Tick();	
