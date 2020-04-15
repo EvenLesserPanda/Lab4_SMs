@@ -18,7 +18,7 @@ void Tick(){
 	switch(state){
 		case Start: // Initial transition
 			PORTC = 0x07;
-			state = OFF_RELEASE;
+			state = Wait;
 			break;
 		case Wait:
 			if(PINA & 0x01){
