@@ -8,32 +8,47 @@
  *	code, is my own original work.
  */
 #include <avr/io.h>
-#include "RIMS.h"
 #ifdef _SIMULATE_
 #include "simAVRHeader.h"
 #endif
 
-enum States{Start, s0, s1} state;
+enum States{Start, OFF_RELEASE, ON_PRESS, ON_RELEASE, OFF_PRESS} state;
 
 void Tick(){
 	switch(state){
 		case Start: // Initial transition
-			state = s0;
+			state = OFF_RELEASE;
 			break;
-		case s0:
-			if(A0){
-				state = s1;
+		case OFF_RELEASE:
+			if(PINA & 0x01){
+				state = ON_PRESS;
 			}
-			else if(!A0){
-				state = s0;
+			else if(!(PINA & 0x01)){
+				state = OFF_RELEASE;
 			}
 			break;
-		case s1:
-			if(A0){
-				state = s0;
+		case ON_PRESS:
+			if(PINA & 0x01){
+				state = ON_PRESS;
 			}
-			else if(!A0){
-				state = s1;
+			else if(!(PINA & 0x01)){
+				state = ON_RELEASE;
+			}
+			break;
+		case ON_RELEASE:
+			if(PINA & 0x01){
+				state = OFF_PRESS;
+			}
+			else if(!(PINA & 0x01)){
+				state = ON_RELEASE;
+			}
+			break;
+		case OFF_PRESS:
+			if(PINA & 0x01){
+				state = OFF_PRESS;
+			}
+			else if(!(PINA & 0x01)){
+				state = OFF_RELEASE;
 			}
 			break;
 		default:
@@ -41,13 +56,17 @@ void Tick(){
 			break;
 	} // Transitions
 	switch(state){ // State actions
-		case s0:
-			B0 = 1;
-			B1 = 0;
+		case OFF_RELEASE:
+			PORTB = 0x01;
 			break;
-		case s1:
-			B0 = 0;
-			B1 = 1;
+		case ON_PRESS:
+			PORTB = 0x02;
+			break;
+		case ON_RELEASE:
+			PORTB = 0x02;
+			break;
+		case OFF_PRESS:
+			PORTB = 0x01;
 			break;
 		default:
 			break;
@@ -55,9 +74,8 @@ void Tick(){
 }
 
 int main(void) {
-	//DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
-	//DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs
-	B = 0x00;
+	DDRA = 0x00; PORTA = 0xFF; // Configure port A's 8 pins as inputs
+	DDRB = 0xFF; PORTB = 0x00; // Configure port B's 8 pins as outputs
 	state = Start;
 	while (1) {
 		Tick();	
