@@ -23,25 +23,43 @@ void Tick(){
 		case Wait:
 			if(PINA & 0x01){
 				state = Increment;
+				PORTC += 1;
 			}
 			else if(PINA & 0x02){
 				state = Decrement;
+				PORTC -= 1;
 			}
 			else if(PINA & 0x03){
 				state = Reset;
+				PORTC = 0x00;
 			}
 			else{
 				state = Wait;
 			}
 			break;
 		case Increment:
-			state = Wait;
+			if(PINA & 0x01){
+				state = Increment;
+			}
+			else{
+				state = Wait;
+			}
 			break;
 		case Decrement:
-			state = Wait;
+			if(PINA & 0x02){
+				state = Decrement;
+			}
+			else{
+				state = Wait;
+			}
 			break;
 		case Reset:
-			state = Wait;
+			if(PINA & 0x03){
+				state = Reset;
+			}
+			else{
+				state = Wait;
+			}
 			break;
 		default:
 			state = Start;
@@ -51,13 +69,10 @@ void Tick(){
 		case Wait:
 			break;
 		case Increment:
-			PORTC += 1;
 			break;
 		case Decrement:
-			PORTC -= 1;
 			break;
 		case Reset:
-			PORTC = 0x00;
 			break;
 		default:
 			break;
