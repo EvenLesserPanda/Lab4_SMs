@@ -31,7 +31,7 @@ void Tick(){
 				state = Reset;
 			}
 			else{
-				state = Reset;
+				state = Wait;
 			}
 			break;
 		case Increment:
