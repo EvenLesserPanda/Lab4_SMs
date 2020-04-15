@@ -22,10 +22,10 @@ void Tick(){
 			break;
 		case Wait:
 			if(PINA & 0x01){
-				state = Decrement;
+				state = Increment;
 			}
 			else if(PINA & 0x02){
-				state = Increment;
+				state = Decrement;
 			}
 			else if(PINA & 0x03){
 				state = Reset;
