@@ -15,8 +15,8 @@
 enum States{Start, Lock, On_Release, Open} state;
 
 unsigned char unlock;
-unsigned char arr[4];
-unsigned char hold;
+int arr[4];
+int hold;
 
 void Tick(){
 	switch(state){
