@@ -12,27 +12,39 @@
 #include "simAVRHeader.h"
 #endif
 
-enum States{Start, s0, s1} state;
+enum States{Start, Lock, On_Release, Open} state;
 
 void Tick(){
 	switch(state){
 		case Start: // Initial transition
-			state = s0;
+			state = Lock;
 			break;
-		case s0:
-			if(PINA & 0x01){
-				state = s1;
+		case Lock:
+			if((PINA & 0x04) == 0x04){
+				state = On_Release;
 			}
-			else if(!(PINA & 0x01)){
-				state = s0;
+			else{
+				state = Lock;
 			}
 			break;
-		case s1:
-			if(PINA & 0x01){
-				state = s0;
+		case On_Release:
+			if((PINA & 0x02) == 0x02){
+				state = Open;
+				PORTB = 0x01;
 			}
-			else if(!(PINA & 0x01)){
-				state = s1;
+			else if((PINA & 0x00) == 0x00){
+				state = On_Release;
+			}
+			else{
+				state = Lock;
+			}
+			break;
+		case Open:
+			if((PINA & 0x80) == 0x80){
+				state = Lock;
+			}
+			else{
+				state = Open;
 			}
 			break;
 		default:
@@ -40,11 +52,12 @@ void Tick(){
 			break;
 	} // Transitions
 	switch(state){ // State actions
-		case s0:
-			PINB = 0x01;
+		case Lock:
+			PORTB = 0x00;
 			break;
-		case s1:
-			PINB = 0x02;
+		case On_Release:
+			break;
+		case Open:
 			break;
 		default:
 			break;
