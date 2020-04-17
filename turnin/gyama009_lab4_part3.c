@@ -53,7 +53,7 @@ void Tick(){
 	} // Transitions
 	switch(state){ // State actions
 		case Lock:
-			PINB = 0x00;
+			PORTB = 0x00;
 			break;
 		case On_Release:
 			break;
