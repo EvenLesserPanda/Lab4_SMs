@@ -15,23 +15,28 @@
 enum States{Start, Lock, On_Release, Open} state;
 
 unsigned char unlock;
+unsigned char arr[4];
+unsigned char hold;
 
 void Tick(){
 	switch(state){
 		case Start: // Initial transition
 			state = Lock;
 			unlock = 0;
+			hold = 0;
 			break;
 		case Lock:
 			if((PINA & 0x04) == 0x04){
 				state = On_Release;
+				hold = 0;
+				arr[hold] = 4;
 			}
 			else{
 				state = Lock;
 			}
 			break;
 		case On_Release:
-			if((PINA & 0x02) == 0x02){
+			if((arr[0] == 0x04) && (arr[1] == 0x01) && (arr[2] == 0x02) && (arr[3] == 0x01)){
 				if(unlock == 0){
 					state = Open;
 					PORTB = 0x01;
@@ -45,8 +50,13 @@ void Tick(){
 			else if((PINA & 0x00) == 0x00){
 				state = On_Release;
 			}
+			else if((PINA & 0x04) == 0x04){
+				hold = 0;
+				arr[hold] = 4;
+			}
 			else{
-				state = Lock;
+				hold += 1;
+				arr[hold] = (PINA | 0x00);
 			}
 			break;
 		case Open:
@@ -55,6 +65,8 @@ void Tick(){
 			}
 			else if((PINA & 0x04) == 0x04){
 				state = On_Release;
+				hold = 0;
+				arr[hold] = 4;
 			}
 			else{
 				state = Open;
