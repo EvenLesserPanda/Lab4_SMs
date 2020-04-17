@@ -12,69 +12,70 @@
 #include "simAVRHeader.h"
 #endif
 
-enum States{Start, Wait, Increment, Decrement, Reset} state;
+enum States{Start, Init, Increment, Decrement, Reset} state;
 
 void Tick(){
 	switch(state){
 		case Start: // Initial transition
 			PORTC = 0x07;
-			state = Wait;
+			state = Init;
 			break;
-		case Wait:
-			if(PINA & 0x01){
+		case Init:
+			if(PINA & 0x03){
+				state = Reset;
+				PORTC = 0x00;
+			}
+			else if((PINA & 0x02) && PORTC > 0){
+				state = Decrement;
+				PORTC -= 1;
+			}
+			else if((PINA & 0x01) && PORTC < 9){
 				state = Increment;
 				PORTC += 1;
 			}
-			else if(PINA & 0x02){
-				state = Decrement;
-				PORTC -= 1;
+			else{
+				state = Init;
+			}
+			break;
+		case Increment:
+			if(PINA & 0x00){
+				state = Init;
 			}
 			else if(PINA & 0x03){
 				state = Reset;
 				PORTC = 0x00;
 			}
 			else{
-				state = Wait;
-			}
-			break;
-		case Increment:
-			if(PORTC < 9){
-				if(PINA & 0x01){
-					state = Increment;
-				}
-				else if(PINA & 0x03){
-					state = Reset;
-				}
-				else{
-					state = Wait;
-				}
+				state = Increment;
 			}
 			break;
 		case Decrement:
-			if(PORTC > 0){
-				if(PINA & 0x02){
-					state = Decrement;
-				}
-				else if(PINA & 0x03){
-					state = Reset;
-				}
-				else{
-					state = Wait;
-				}
+			if(PINA & 0x00){
+				state = Init;
+			}
+			else if(PINA & 0x03){
+				state = Reset;
+				PORTC = 0x00;
+			}
+			else{
+				state = Decrement;
 			}
 			break;
 		case Reset:
-			if(PINA & 0x03){
+			if((PINA & 0x03) || (PORTC == 0x09) || (PORTC == 0x00)){
 				state = Reset;
+				PORTC = 0x00;
 			}
-			else if(PINA & 0x01){
+			else if((PINA & 0x01) && (PORTC < 9)){
 				state = Increment;
+				PORTC += 1;
 			}
-			else if(PINA & 0x02){
+			else if((PINA & 0x02) && (PORTC > 0)){
 				state = Decrement;
+				PORTC -= 1;
 			}
 			else{
-				state = Wait;
+				state = Init;
 			}
 			break;
 		default:
@@ -82,7 +83,7 @@ void Tick(){
 			break;
 	} // Transitions
 	switch(state){ // State actions
-		case Wait:
+		case Init:
 			break;
 		case Increment:
 			break;
