@@ -25,11 +25,11 @@ void Tick(){
 				state = Reset;
 				PORTC = 0x00;
 			}
-			else if((PINA & 0x02) && (PORTC > 0)){
+			else if((PINA & 0x02)){
 				state = Decrement;
 				PORTC -= 1;
 			}
-			else if((PINA & 0x01) && (PORTC < 9)){
+			else if((PINA & 0x01)){
 				state = Increment;
 				PORTC += 1;
 			}
@@ -62,15 +62,15 @@ void Tick(){
 			}
 			break;
 		case Reset:
-			if((PINA & 0x03) || (PORTC == 0x09) || (PORTC == 0x00)){
+			if((PINA & 0x03)){
 				state = Reset;
 				PORTC = 0x00;
 			}
-			else if((PINA & 0x01) && (PORTC < 9)){
+			else if((PINA & 0x01)){
 				state = Increment;
 				PORTC += 1;
 			}
-			else if((PINA & 0x02) && (PORTC > 0)){
+			else if((PINA & 0x02)){
 				state = Decrement;
 				PORTC -= 1;
 			}
